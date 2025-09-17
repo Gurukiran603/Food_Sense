@@ -1,6 +1,5 @@
-﻿# Food-Sense-kalp-AI-Thon-
-# Food_Sense
-
+﻿# Food-Sense-kalp-AI-Thon.
+ 
 ## FoodSense
 
 Smart food shelf-life prediction and freshness tracking. This repository contains a FastAPI backend and a React + Vite + Tailwind frontend. The app predicts expiry dates for produce, lets users authenticate, and surfaces alerts. A curated image dataset is included for experimentation.
@@ -183,4 +182,5 @@ npm run build
 - Frontend can be deployed to static hosts (Vercel, Netlify). Ensure `VITE` environment configuration or runtime API base points to your backend.
 
 ---
+
 
