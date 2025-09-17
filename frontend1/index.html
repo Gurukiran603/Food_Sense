@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>FoodSense</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-rose-50 to-orange-50">
+	<header class="bg-white/80 backdrop-blur sticky top-0 z-20 border-b">
+		<div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+			<a href="./index.html" class="text-xl font-bold text-rose-700">FoodSense</a>
+			<nav class="flex items-center gap-3 text-sm">
+				<a href="./signin.html" class="text-rose-700 hover:underline">Sign in</a>
+				<a href="./register.html" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded shadow">Get started</a>
+			</nav>
+		</div>
+	</header>
+	<main>
+		<section class="bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?q=80&w=1600&auto=format&fit=crop');">
+			<div class="max-w-6xl mx-auto px-4 py-24">
+				<h1 class="text-4xl md:text-5xl font-extrabold text-white drop-shadow">Save fresh food. Save money. Save the planet.</h1>
+				<p class="text-white/90 mt-3 max-w-2xl drop-shadow">FoodSense predicts expiries and gives smart suggestions so your fruits and veggies never go to waste.</p>
+				<div class="mt-6">
+					<a href="./register.html" class="bg-rose-600 hover:bg-rose-700 text-white px-5 py-3 rounded shadow">Get started</a>
+				</div>
+			</div>
+		</section>
+	</main>
+	<footer class="mt-16 border-t">
+		<div class="max-w-6xl mx-auto px-4 py-8 text-sm text-gray-600">© <span id="year"></span> FoodSense</div>
+	</footer>
+	<script>
+		document.getElementById('year').textContent = new Date().getFullYear();
+	</script>
+</body>
+</html>
+

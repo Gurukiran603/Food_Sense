@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>FoodSense - Dashboard</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-rose-50 to-orange-50">
+	<header class="bg-white/80 backdrop-blur sticky top-0 z-20 border-b">
+		<div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+			<a href="./index.html" class="text-xl font-bold text-rose-700">FoodSense</a>
+			<nav class="flex items-center gap-3 text-sm">
+				<a href="#" onclick="logout()" class="text-rose-700 hover:underline">Logout</a>
+			</nav>
+		</div>
+	</header>
+	<main class="max-w-6xl mx-auto px-4 py-8">
+		<div class="grid grid-cols-3 gap-4 mb-6">
+			<div class="bg-white rounded-xl shadow p-4 text-center">
+				<p class="text-xs text-gray-500">Weather</p>
+				<p id="w-weather" class="text-lg font-semibold">—</p>
+			</div>
+			<div class="bg-white rounded-xl shadow p-4 text-center">
+				<p class="text-xs text-gray-500">Temperature</p>
+				<p id="w-temp" class="text-lg font-semibold">—</p>
+			</div>
+			<div class="bg-white rounded-xl shadow p-4 text-center">
+				<p class="text-xs text-gray-500">SpO₂</p>
+				<p id="w-spo2" class="text-lg font-semibold">—</p>
+			</div>
+		</div>
+		<div class="grid md:grid-cols-2 gap-6">
+			<section class="bg-white rounded-xl shadow p-6">
+				<h2 class="font-semibold text-lg mb-3">Predict single item</h2>
+				<form id="single" class="flex gap-2">
+					<input id="item" class="flex-1 border rounded px-3 py-2" placeholder="e.g., Apple" />
+					<button class="bg-green-600 hover:bg-green-700 text-white rounded px-4" type="submit">Predict</button>
+				</form>
+				<p id="singleOut" class="text-sm text-gray-700 mt-3"></p>
+				<div id="singleAlert" class="mt-2 text-sm font-medium"></div>
+			</section>
+			<section class="bg-white rounded-xl shadow p-6">
+				<h2 class="font-semibold text-lg mb-3">Fruit shelf-life</h2>
+				<div class="flex flex-wrap gap-2 mb-3" id="fruitButtons"></div>
+				<ul id="batchOut" class="space-y-1"></ul>
+			</section>
+		</div>
+		<section class="bg-white rounded-xl shadow p-6 mt-6">
+			<h2 class="font-semibold text-lg mb-3">Your alerts</h2>
+			<div id="alerts" class="space-y-2 text-sm"></div>
+		</section>
+	</main>
+	<script>
+		const API_BASE = (localStorage.getItem('VITE_API_BASE') || 'http://localhost:8000');
+		const token = localStorage.getItem('token');
+		if (!token) location.href = './signin.html';
+
+		async function loadEnv(){
+			try{
+				const r = await fetch(API_BASE + '/api/env');
+				const d = await r.json();
+				document.getElementById('w-weather').textContent = d.weather;
+				document.getElementById('w-temp').textContent = d.temperature_c + '°C';
+				document.getElementById('w-spo2').textContent = d.spo2_pct + '%';
+			}catch{}
+		}
+		loadEnv();
+
+		const FRUITS = ['banana','apple','tomato','carrot','strawberry','orange','grape'];
+		const fruitButtons = document.getElementById('fruitButtons');
+		const selected = new Set(['banana','apple','tomato']);
+		FRUITS.forEach(f => {
+			const btn = document.createElement('button');
+			btn.textContent = f.charAt(0).toUpperCase() + f.slice(1);
+			btn.className = 'px-3 py-1.5 rounded border bg-white hover:bg-rose-50';
+			btn.onclick = () => { if (selected.has(f)) selected.delete(f); else selected.add(f); refreshBatch(); };
+			fruitButtons.appendChild(btn);
+		});
+
+		document.getElementById('single').addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const item_name = (document.getElementById('item')).value || 'Banana';
+			const res = await fetch(API_BASE + '/api/predict', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ item_name }) });
+			const data = await res.json();
+			document.getElementById('singleOut').textContent = 'Predicted expiry: ' + new Date(data.predicted_expiry).toLocaleString();
+			// Alert sentence based on days left
+			const now = new Date();
+			const exp = new Date(data.predicted_expiry);
+			const days = Math.ceil((exp.getTime() - now.getTime()) / (1000*60*60*24));
+			const alertBox = document.getElementById('singleAlert');
+			if (days <= 0) {
+				alertBox.textContent = 'This item appears expired. Please check safety before using.';
+				alertBox.className = 'mt-2 text-sm font-medium text-red-700';
+			} else if (days <= 2) {
+				alertBox.textContent = 'This fruit is expiring soon. Use it today!';
+				alertBox.className = 'mt-2 text-sm font-medium text-orange-700';
+			} else if (days <= 5) {
+				alertBox.textContent = 'This fruit will expire in a few days. Plan to use it soon!';
+				alertBox.className = 'mt-2 text-sm font-medium text-amber-700';
+			} else {
+				alertBox.textContent = 'This fruit has time left. Store properly and plan recipes!';
+				alertBox.className = 'mt-2 text-sm font-medium text-green-700';
+			}
+		});
+
+		async function refreshBatch() {
+			const items = Array.from(selected).map(v => ({ item_name: v }));
+			const res = await fetch(API_BASE + '/api/predict/batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ items }) });
+			const data = await res.json();
+			const ul = document.getElementById('batchOut');
+			ul.innerHTML = '';
+			data.results.forEach(r => {
+				const li = document.createElement('li');
+				li.className = 'text-sm flex justify-between border-b py-1';
+				li.innerHTML = '<span class="capitalize">'+r.item_name+'</span><span class="text-gray-600">'+(new Date(r.predicted_expiry).toLocaleDateString())+'</span>';
+				ul.appendChild(li);
+			});
+		}
+
+		async function loadAlerts() {
+			try {
+				const res = await fetch(API_BASE + '/api/alerts', { headers: { 'Authorization': 'Bearer ' + token } });
+				const data = await res.json();
+				const box = document.getElementById('alerts');
+				box.innerHTML = '';
+				data.forEach(a => {
+					const div = document.createElement('div');
+					div.className = 'p-3 border rounded bg-white';
+					div.innerHTML = '<p>'+a.message+'</p><p class="text-xs text-gray-500">'+(new Date(a.created_at).toLocaleString())+'</p>';
+					box.appendChild(div);
+				});
+			} catch {}
+		}
+
+		function logout() { localStorage.removeItem('token'); location.href='./signin.html'; }
+
+		refreshBatch();
+		loadAlerts();
+	</script>
+</body>
+</html>

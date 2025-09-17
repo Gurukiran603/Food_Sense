@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>FoodSense - Sign In</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1547517023-7ca0c162f816?q=80&w=1600&auto=format&fit=crop');">
+	<div class="min-h-screen flex items-center justify-center p-4">
+		<div class="w-full max-w-md bg-white/90 backdrop-blur rounded-2xl shadow p-6">
+			<h1 class="text-2xl font-bold text-center mb-1 text-rose-700">FoodSense</h1>
+			<p class="text-center text-sm text-gray-600 mb-6">Welcome back</p>
+			<form id="form" class="space-y-4">
+				<input id="email" class="w-full border rounded px-3 py-2" type="email" placeholder="Email" required />
+				<input id="password" class="w-full border rounded px-3 py-2" type="password" placeholder="Password" required />
+				<div id="error" class="text-red-600 text-sm"></div>
+				<button class="w-full bg-rose-600 hover:bg-rose-700 text-white rounded px-3 py-2" type="submit">Sign In</button>
+			</form>
+			<div class="my-4 text-center text-gray-500">or</div>
+			<button class="w-full border rounded px-3 py-2 flex items-center justify-center gap-2" onclick="alert('Integrate Google Identity on demand')">
+				<img alt="google" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" />
+				Continue with Google
+			</button>
+			<p class="text-sm text-center mt-4">No account? <a href="./register.html" class="text-rose-700 font-medium">Create one</a></p>
+		</div>
+	</div>
+	<script>
+		const API_BASE = (localStorage.getItem('VITE_API_BASE') || 'http://localhost:8000');
+		document.getElementById('form').addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const email = (document.getElementById('email')).value;
+			const password = (document.getElementById('password')).value;
+			try {
+				const res = await fetch(API_BASE + '/api/auth/login', {
+					method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password })
+				});
+				if (!res.ok) throw new Error((await res.json()).detail || 'Login failed');
+				const data = await res.json();
+				localStorage.setItem('token', data.access_token);
+				location.href = './dashboard.html';
+			} catch (err) {
+				document.getElementById('error').textContent = err.message || 'Login failed';
+			}
+		});
+	</script>
+</body>
+</html>
+
