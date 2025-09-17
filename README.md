@@ -4,6 +4,95 @@
 
 Smart food shelf-life prediction and freshness tracking. This repository contains a FastAPI backend and a React + Vite + Tailwind frontend. The app predicts expiry dates for produce, lets users authenticate, and surfaces alerts. A curated image dataset is included for experimentation.
 
+## 🚀 Features
+- AI/ML-powered expiry detection (precomputes fruit/vegetable shelf life)  
+- FastAPI backend with SQLite storage  
+- React frontend (Vite) for user interaction  
+- Static frontend served on port 3000  
+- Recipe suggestions based on near-expiry foods  
+
+---
+
+## 📂 Project Structure
+```
+
+kittip/
+│── backend/        # FastAPI app (ML + API + SQLite)
+│── frontend/       # React (Vite) frontend
+│── frontend1/      # Static frontend (served via python http.server)
+│── dataset/        # Dataset used for ML model
+
+````
+
+---
+
+## ⚡ Setup Instructions
+
+### 1️⃣ Clone the Repository
+```sh
+git clone https://github.com/Gurukiran603/Food_Sense.git
+cd Food_Sense
+````
+
+### 2️⃣ Create Virtual Environment (Python 3.10+ recommended)
+
+```sh
+python -m venv savorsmart_env
+savorsmart_env\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3️⃣ Install Frontend Dependencies
+
+```sh
+cd frontend
+npm install
+cd ..
+```
+
+---
+
+## ▶ Run the Project (All Services)
+
+Copy-paste this **single command** in **PowerShell**:
+
+```powershell
+# Go to project root
+cd C:\Users\HP\OneDrive\Desktop\kittip
+
+# 1) AI/ML precompute from 50% of dataset (prints averages in this window)
+Write-Host "Precomputing dataset averages (50%)..."
+D:\savorsmart_env\.venv\Scripts\python -c "import sys,os; sys.path.append('backend'); os.environ['DATASET_DIR']='dataset'; from app.ml.dataset_days import get_fruit_avg_days; print(get_fruit_avg_days())"
+Write-Host "Done."
+
+# 2) Start Backend (FastAPI + SQLite) in a new window
+$backendCmd = 'cd C:\Users\HP\OneDrive\Desktop\kittip; $env:DATASET_DIR="dataset"; D:\savorsmart_env\.venv\Scripts\python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload'
+Start-Process powershell -ArgumentList "-NoExit","-Command",$backendCmd
+
+# 3) Start React frontend (Vite) in a new window (API base: http://localhost:8000)
+$frontendCmd = 'cd C:\Users\HP\OneDrive\Desktop\kittip\frontend; $env:VITE_API_BASE = "http://localhost:8000"; npm run dev'
+Start-Process powershell -ArgumentList "-NoExit","-Command",$frontendCmd
+
+# 4) Start frontend1 (static) in a new window on port 3000
+$frontend1Cmd = 'cd C:\Users\HP\OneDrive\Desktop\kittip\frontend1; python -m http.server 3000'
+Start-Process powershell -ArgumentList "-NoExit","-Command",$frontend1Cmd
+
+Write-Host "`nAll services launched:"
+Write-Host "Backend:     http://localhost:8000"
+Write-Host "Frontend:    (see the URL printed by npm run dev, usually http://localhost:5173)"
+Write-Host "Frontend1:   http://localhost:3000"
+```
+
+---
+
+## 🌐 Access the App
+
+* **Backend (API):** [http://localhost:8000](http://localhost:8000)
+* **Frontend (React):** Usually [http://localhost:5173](http://localhost:5173)
+* **Frontend1 (Static):** [http://localhost:3000](http://localhost:3000)
+----
+
+
 ### Repository structure
 
 ```text
@@ -182,5 +271,6 @@ npm run build
 - Frontend can be deployed to static hosts (Vercel, Netlify). Ensure `VITE` environment configuration or runtime API base points to your backend.
 
 ---
+
 
 
